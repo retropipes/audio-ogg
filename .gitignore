@@ -75,3 +75,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # Overrides
+!lib-audio-ogg/lib/*.jar
