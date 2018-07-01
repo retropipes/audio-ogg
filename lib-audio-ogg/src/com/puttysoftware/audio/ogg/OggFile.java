@@ -44,6 +44,11 @@ class OggFile extends OggFactory {
             }
         }
     }
+    
+    @Override
+    public boolean isPlaying() {
+    	return this.player != null && this.isAlive();
+    }
 
     @Override
     public void stopLoop() {

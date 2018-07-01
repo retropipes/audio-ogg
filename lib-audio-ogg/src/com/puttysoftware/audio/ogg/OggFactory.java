@@ -23,6 +23,8 @@ public abstract class OggFactory extends Thread {
 
     // Methods
     public abstract void stopLoop();
+    
+    public abstract boolean isPlaying();
 
     protected abstract void updateNumber(int newNumber);
 

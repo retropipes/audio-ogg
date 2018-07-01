@@ -37,6 +37,11 @@ class OggResource extends OggFactory {
             OggFactory.taskCompleted(this.number);
         }
     }
+    
+    @Override
+    public boolean isPlaying() {
+    	return this.player != null && this.isAlive();
+    }
 
     @Override
     public void stopLoop() {
