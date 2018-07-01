@@ -1,7 +1,7 @@
-/* OGG Player for Java
+/* Ogg Player for Java
 Licensed under Apache 2.0. See the LICENSE file for details.
 
-All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-ogg
+All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-Ogg
  */
 package com.puttysoftware.audio.ogg;
 
@@ -12,12 +12,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-class OGGResource extends OGGFactory {
+class OggResource extends OggFactory {
     private final URL soundURL;
     private int number;
-    private OGGPlayer player;
+    private OggPlayer player;
 
-    public OGGResource(final ThreadGroup group, final URL resURL,
+    public OggResource(final ThreadGroup group, final URL resURL,
             final int taskNum) {
         super(group);
         this.soundURL = resURL;
@@ -28,13 +28,13 @@ class OGGResource extends OGGFactory {
     public void run() {
         try (AudioInputStream ais = AudioSystem
                 .getAudioInputStream(this.soundURL)) {
-            this.player = new OGGPlayer(ais);
+            this.player = new OggPlayer(ais);
             this.player.playLoop();
-            OGGFactory.taskCompleted(this.number);
+            OggFactory.taskCompleted(this.number);
         } catch (final UnsupportedAudioFileException e1) {
-            OGGFactory.taskCompleted(this.number);
+            OggFactory.taskCompleted(this.number);
         } catch (final IOException e1) {
-            OGGFactory.taskCompleted(this.number);
+            OggFactory.taskCompleted(this.number);
         }
     }
 

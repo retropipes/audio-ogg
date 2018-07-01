@@ -1,7 +1,7 @@
-/* OGG Player for Java
+/* Ogg Player for Java
 Licensed under Apache 2.0. See the LICENSE file for details.
 
-All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-ogg
+All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-Ogg
  */
 package com.puttysoftware.audio.ogg;
 
@@ -14,14 +14,14 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
-class OGGPlayer {
+class OggPlayer {
     private AudioInputStream stream;
     private AudioInputStream decodedStream;
     private AudioFormat format;
     private AudioFormat decodedFormat;
     private boolean stop;
 
-    public OGGPlayer(final AudioInputStream ais) {
+    public OggPlayer(final AudioInputStream ais) {
         this.stream = ais;
         this.stop = false;
     }
@@ -47,7 +47,7 @@ class OGGPlayer {
             } catch (Exception e) {
                 // Do nothing
             }
-            try (SourceDataLine line = OGGPlayer.getLine(this.decodedFormat)) {
+            try (SourceDataLine line = OggPlayer.getLine(this.decodedFormat)) {
                 if (line != null) {
                     try {
                         byte[] data = new byte[4096];

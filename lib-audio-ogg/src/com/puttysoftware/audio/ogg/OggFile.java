@@ -1,7 +1,7 @@
-/* OGG Player for Java
+/* Ogg Player for Java
 Licensed under Apache 2.0. See the LICENSE file for details.
 
-All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-ogg
+All support is handled via the GitHub repository: https://github.com/wrldwzrd89/lib-java-audio-Ogg
  */
 package com.puttysoftware.audio.ogg;
 
@@ -12,15 +12,15 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-class OGGFile extends OGGFactory {
+class OggFile extends OggFactory {
     private final String filename;
     private int number;
-    private OGGPlayer player;
+    private OggPlayer player;
 
-    public OGGFile(final ThreadGroup group, final String oggfile,
+    public OggFile(final ThreadGroup group, final String Oggfile,
             final int taskNum) {
         super(group);
-        this.filename = oggfile;
+        this.filename = Oggfile;
         this.number = taskNum;
     }
 
@@ -29,18 +29,18 @@ class OGGFile extends OGGFactory {
         if (this.filename != null) {
             final File soundFile = new File(this.filename);
             if (!soundFile.exists()) {
-                OGGFactory.taskCompleted(this.number);
+                OggFactory.taskCompleted(this.number);
                 return;
             }
             try (AudioInputStream ais = AudioSystem
                     .getAudioInputStream(soundFile)) {
-                this.player = new OGGPlayer(ais);
+                this.player = new OggPlayer(ais);
                 this.player.playLoop();
-                OGGFactory.taskCompleted(this.number);
+                OggFactory.taskCompleted(this.number);
             } catch (final UnsupportedAudioFileException e1) {
-                OGGFactory.taskCompleted(this.number);
+                OggFactory.taskCompleted(this.number);
             } catch (final IOException e1) {
-                OGGFactory.taskCompleted(this.number);
+                OggFactory.taskCompleted(this.number);
             }
         }
     }
