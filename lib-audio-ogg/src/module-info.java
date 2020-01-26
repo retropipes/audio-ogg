@@ -8,6 +8,7 @@ All support is handled via the GitHub repository: https://github.com/wrldwzrd89/
  */
 module com.puttysoftware.audio.ogg {
     exports com.puttysoftware.audio.ogg;
-
+    uses javax.sound.sampled.spi.AudioFileReader;
+    uses javax.sound.sampled.spi.FormatConversionProvider;
     requires java.desktop;
 }
