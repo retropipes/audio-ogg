@@ -1,4 +1,4 @@
-# lib-java-audio-ogg
+# OGG Audio Library
 
 Java class library providing OGG format audio playback.
 
