@@ -12,10 +12,10 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-class OggResource extends OggFactory {
+class OggResource extends OggPlayer {
     private final URL soundURL;
     private int number;
-    private OggPlayer player;
+    private OggPlayThread player;
 
     public OggResource(final ThreadGroup group, final URL resURL,
             final int taskNum) {
@@ -28,13 +28,13 @@ class OggResource extends OggFactory {
     public void run() {
         try (AudioInputStream ais = AudioSystem
                 .getAudioInputStream(this.soundURL)) {
-            this.player = new OggPlayer(ais);
+            this.player = new OggPlayThread(ais);
             this.player.playLoop();
-            OggFactory.taskCompleted(this.number);
+            OggPlayer.taskCompleted(this.number);
         } catch (final UnsupportedAudioFileException e1) {
-            OggFactory.taskCompleted(this.number);
+            OggPlayer.taskCompleted(this.number);
         } catch (final IOException e1) {
-            OggFactory.taskCompleted(this.number);
+            OggPlayer.taskCompleted(this.number);
         }
     }
     

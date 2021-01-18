@@ -11,9 +11,9 @@ public class OggExceptionHandler implements UncaughtExceptionHandler {
     @Override
     public void uncaughtException(final Thread thr, final Throwable exc) {
         try {
-            if (thr instanceof OggFactory) {
-                final OggFactory media = (OggFactory) thr;
-                OggFactory.taskCompleted(media.getNumber());
+            if (thr instanceof OggPlayer) {
+                final OggPlayer media = (OggPlayer) thr;
+                OggPlayer.taskCompleted(media.getNumber());
             }
         } catch (Throwable t) {
             // Ignore

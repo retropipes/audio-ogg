@@ -5,88 +5,77 @@ All support is handled via the GitHub repository: https://github.com/wrldwzrd89/
  */
 package com.puttysoftware.audio.ogg;
 
-import java.io.IOException;
+import java.net.URL;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+public abstract class OggPlayer extends Thread {
+    // Constants
+    protected static final int EXTERNAL_BUFFER_SIZE = 4096; // 4Kb
+    private static int ACTIVE_MEDIA_COUNT = 0;
+    private static int MAX_MEDIA_ACTIVE = 5;
+    private static OggPlayer[] ACTIVE_MEDIA = new OggPlayer[OggPlayer.MAX_MEDIA_ACTIVE];
+    private static ThreadGroup MEDIA_GROUP = new ThreadGroup(
+            "Ogg Media Players");
+    private static OggExceptionHandler meh = new OggExceptionHandler();
 
-class OggPlayer {
-    private AudioInputStream stream;
-    private AudioInputStream decodedStream;
-    private AudioFormat format;
-    private AudioFormat decodedFormat;
-    private boolean stop;
-
-    public OggPlayer(final AudioInputStream ais) {
-        this.stream = ais;
-        this.stop = false;
+    // Constructor
+    protected OggPlayer(final ThreadGroup group) {
+        super(group, "Ogg Media Player " + OggPlayer.ACTIVE_MEDIA_COUNT);
     }
 
-    public void playLoop() {
-        while (!this.stop) {
-            try {
-                // Get AudioInputStream from given file.
-                this.decodedStream = null;
-                if (this.stream != null) {
-                    this.format = this.stream.getFormat();
-                    this.decodedFormat = new AudioFormat(
-                            AudioFormat.Encoding.PCM_SIGNED,
-                            this.format.getSampleRate(), 16,
-                            this.format.getChannels(),
-                            this.format.getChannels() * 2,
-                            this.format.getSampleRate(), false);
-                    // Get AudioInputStream that will be decoded by underlying
-                    // VorbisSPI
-                    this.decodedStream = AudioSystem.getAudioInputStream(
-                            this.decodedFormat, this.stream);
-                }
-            } catch (Exception e) {
-                // Do nothing
+    // Methods
+    public abstract void stopLoop();
+
+    public abstract boolean isPlaying();
+
+    protected abstract void updateNumber(int newNumber);
+
+    abstract int getNumber();
+
+    // Factories
+    public static OggPlayer loadFile(final String file) {
+        return OggPlayer.provisionMedia(new OggFile(OggPlayer.MEDIA_GROUP,
+                file, OggPlayer.ACTIVE_MEDIA_COUNT));
+    }
+
+    public static OggPlayer loadResource(final URL resource) {
+        return OggPlayer.provisionMedia(new OggResource(OggPlayer.MEDIA_GROUP,
+                resource, OggPlayer.ACTIVE_MEDIA_COUNT));
+    }
+
+    public void play() {
+        this.start();
+    }
+
+    private static OggPlayer provisionMedia(final OggPlayer src) {
+        if (OggPlayer.ACTIVE_MEDIA_COUNT >= OggPlayer.MAX_MEDIA_ACTIVE) {
+            OggPlayer.killAllMediaPlayers();
+        }
+        try {
+            if (src != null) {
+                src.setUncaughtExceptionHandler(OggPlayer.meh);
+                OggPlayer.ACTIVE_MEDIA[OggPlayer.ACTIVE_MEDIA_COUNT] = src;
+                OggPlayer.ACTIVE_MEDIA_COUNT++;
             }
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class,
-                    this.decodedFormat);
-            try (Line res = AudioSystem.getLine(info);
-                    SourceDataLine line = (SourceDataLine) res) {
-                if (line != null) {
-                    line.open(this.decodedFormat);
-                    try {
-                        byte[] data = new byte[4096];
-                        // Start
-                        line.start();
-                        int nBytesRead = 0;
-                        while (nBytesRead != -1) {
-                            nBytesRead = this.decodedStream.read(data, 0,
-                                    data.length);
-                            if (nBytesRead != -1) {
-                                line.write(data, 0, nBytesRead);
-                            }
-                            if (this.stop) {
-                                break;
-                            }
-                        }
-                        // Stop
-                        line.drain();
-                        line.stop();
-                    } catch (IOException io) {
-                        // Do nothing
-                    } finally {
-                        // Stop
-                        line.drain();
-                        line.stop();
-                    }
+        } catch (final ArrayIndexOutOfBoundsException aioob) {
+            // Do nothing
+        }
+        return src;
+    }
+
+    private static void killAllMediaPlayers() {
+        OggPlayer.MEDIA_GROUP.interrupt();
+    }
+
+    static synchronized void taskCompleted(final int taskNum) {
+        OggPlayer.ACTIVE_MEDIA[taskNum] = null;
+        for (int z = taskNum + 1; z < OggPlayer.ACTIVE_MEDIA.length; z++) {
+            if (OggPlayer.ACTIVE_MEDIA[z] != null) {
+                OggPlayer.ACTIVE_MEDIA[z - 1] = OggPlayer.ACTIVE_MEDIA[z];
+                if (OggPlayer.ACTIVE_MEDIA[z - 1].isAlive()) {
+                    OggPlayer.ACTIVE_MEDIA[z - 1].updateNumber(z - 1);
                 }
-            } catch (LineUnavailableException lue) {
-                // Do nothing
             }
         }
-    }
-
-    public void stopLoop() {
-        this.stop = true;
+        OggPlayer.ACTIVE_MEDIA_COUNT--;
     }
 }
