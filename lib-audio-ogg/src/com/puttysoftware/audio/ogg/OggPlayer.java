@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
@@ -47,8 +48,12 @@ class OggPlayer {
             } catch (Exception e) {
                 // Do nothing
             }
-            try (SourceDataLine line = OggPlayer.getLine(this.decodedFormat)) {
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class,
+                    this.decodedFormat);
+            try (Line res = AudioSystem.getLine(info);
+                    SourceDataLine line = (SourceDataLine) res) {
                 if (line != null) {
+                    line.open(this.decodedFormat);
                     try {
                         byte[] data = new byte[4096];
                         // Start
@@ -79,16 +84,6 @@ class OggPlayer {
                 // Do nothing
             }
         }
-    }
-
-    private static SourceDataLine getLine(AudioFormat audioFormat)
-            throws LineUnavailableException {
-        SourceDataLine res = null;
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class,
-                audioFormat);
-        res = (SourceDataLine) AudioSystem.getLine(info);
-        res.open(audioFormat);
-        return res;
     }
 
     public void stopLoop() {
