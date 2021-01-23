@@ -20,13 +20,11 @@ class OggLoopPlayThread {
     private AudioInputStream decodedStream;
     private AudioFormat format;
     private AudioFormat decodedFormat;
-    private Thread intCheck;
     private boolean stop;
 
-    public OggLoopPlayThread(final AudioInputStream ais, final Thread thr) {
+    public OggLoopPlayThread(final AudioInputStream ais) {
         this.stream = ais;
         this.stop = false;
-        this.intCheck = thr;
     }
 
     public void play() {
@@ -56,32 +54,39 @@ class OggLoopPlayThread {
             if (line != null) {
                 line.open(this.decodedFormat);
                 try {
-                    byte[] data = new byte[4096];
+                    byte[] data = new byte[16];
                     // Start
                     line.start();
-                    while (!this.stop && !this.intCheck.isInterrupted()) {
+                    while (!this.stop) {
+                        if (this.stop) {
+                            return;
+                        }
                         int nBytesRead = 0;
-                        while (nBytesRead != -1) {
+                        while (nBytesRead != -1 && !this.stop) {
                             nBytesRead = this.decodedStream.read(data, 0,
                                     data.length);
+                            if (this.stop) {
+                                return;
+                            }
                             if (nBytesRead != -1) {
                                 line.write(data, 0, nBytesRead);
                             }
-                            if (this.stop || this.intCheck.isInterrupted()) {
-                                break;
+                            if (this.stop) {
+                                return;
                             }
+                        }
+                        if (this.stop) {
+                            return;
                         }
                         // Reset
                         this.stream.reset();
                     }
                     // Stop
-                    line.drain();
                     line.stop();
                 } catch (IOException io) {
                     // Do nothing
                 } finally {
                     // Stop
-                    line.drain();
                     line.stop();
                 }
             }

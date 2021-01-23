@@ -9,83 +9,50 @@ import java.net.URL;
 
 public abstract class OggPlayer extends Thread {
     // Constants
-    protected static final int EXTERNAL_BUFFER_SIZE = 4096; // 4Kb
-    private static int ACTIVE_MEDIA_COUNT = 0;
-    private static int MAX_MEDIA_ACTIVE = 5;
-    private static OggPlayer[] ACTIVE_MEDIA = new OggPlayer[OggPlayer.MAX_MEDIA_ACTIVE];
-    private static ThreadGroup MEDIA_GROUP = new ThreadGroup(
-            "Ogg Media Players");
-    private static OggExceptionHandler meh = new OggExceptionHandler();
+    private static OggPlayer ACTIVE_MEDIA;
 
     // Constructor
-    protected OggPlayer(final ThreadGroup group) {
-        super(group, "Ogg Media Player " + OggPlayer.ACTIVE_MEDIA_COUNT);
+    protected OggPlayer() {
+        super("Ogg Media Player");
     }
 
     // Methods
-    public abstract void stopPlaying();
+    protected abstract void stopPlayer();
 
     public abstract boolean isPlaying();
 
-    protected abstract void updateNumber(int newNumber);
-
-    abstract int getNumber();
-
     // Factories
     public static OggPlayer loadLoopedFile(final String file) {
-        return OggPlayer.provisionMedia(new OggLoopFile(OggPlayer.MEDIA_GROUP,
-                file, OggPlayer.ACTIVE_MEDIA_COUNT));
+        OggPlayer.stopPlaying();
+        OggPlayer.ACTIVE_MEDIA = new OggLoopFile(file);
+        return OggPlayer.ACTIVE_MEDIA;
     }
 
     public static OggPlayer loadLoopedResource(final URL resource) {
-        return OggPlayer.provisionMedia(new OggLoopResource(OggPlayer.MEDIA_GROUP,
-                resource, OggPlayer.ACTIVE_MEDIA_COUNT));
+        OggPlayer.stopPlaying();
+        OggPlayer.ACTIVE_MEDIA = new OggLoopResource(resource);
+        return OggPlayer.ACTIVE_MEDIA;
     }
-    
+
     public static OggPlayer loadOneShotFile(final String file) {
-        return OggPlayer.provisionMedia(new OggFile(OggPlayer.MEDIA_GROUP,
-                file, OggPlayer.ACTIVE_MEDIA_COUNT));
+        OggPlayer.stopPlaying();
+        OggPlayer.ACTIVE_MEDIA = new OggFile(file);
+        return OggPlayer.ACTIVE_MEDIA;
     }
 
     public static OggPlayer loadOneShotResource(final URL resource) {
-        return OggPlayer.provisionMedia(new OggResource(OggPlayer.MEDIA_GROUP,
-                resource, OggPlayer.ACTIVE_MEDIA_COUNT));
+        OggPlayer.stopPlaying();
+        OggPlayer.ACTIVE_MEDIA = new OggResource(resource);
+        return OggPlayer.ACTIVE_MEDIA;
     }
 
     public void play() {
         this.start();
     }
 
-    private static OggPlayer provisionMedia(final OggPlayer src) {
-        if (OggPlayer.ACTIVE_MEDIA_COUNT >= OggPlayer.MAX_MEDIA_ACTIVE) {
-            OggPlayer.stopAllPlayers();
+    public static void stopPlaying() {
+        if (OggPlayer.ACTIVE_MEDIA != null) {
+            OggPlayer.ACTIVE_MEDIA.stopPlayer();
         }
-        try {
-            if (src != null) {
-                src.setUncaughtExceptionHandler(OggPlayer.meh);
-                OggPlayer.ACTIVE_MEDIA[OggPlayer.ACTIVE_MEDIA_COUNT] = src;
-                OggPlayer.ACTIVE_MEDIA_COUNT++;
-            }
-        } catch (final ArrayIndexOutOfBoundsException aioob) {
-            // Do nothing
-        }
-        return src;
-    }
-
-    public static void stopAllPlayers() {
-        OggPlayer.MEDIA_GROUP.interrupt();
-    }
-
-    static synchronized void taskCompleted(final int taskNum) {
-        OggPlayer.ACTIVE_MEDIA[taskNum] = null;
-        for (int z = taskNum + 1; z < OggPlayer.ACTIVE_MEDIA.length; z++) {
-            if (OggPlayer.ACTIVE_MEDIA[z] != null) {
-                OggPlayer.ACTIVE_MEDIA[z - 1] = OggPlayer.ACTIVE_MEDIA[z];
-                if (OggPlayer.ACTIVE_MEDIA[z - 1].isAlive()) {
-                    OggPlayer.ACTIVE_MEDIA[z - 1].updateNumber(z - 1);
-                }
-            }
-        }
-        OggPlayer.ACTIVE_MEDIA_COUNT--;
     }
 }

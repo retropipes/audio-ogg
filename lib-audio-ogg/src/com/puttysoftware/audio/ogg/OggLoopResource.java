@@ -14,49 +14,33 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 class OggLoopResource extends OggPlayer {
     private final URL soundURL;
-    private int number;
     private OggLoopPlayThread player;
 
-    public OggLoopResource(final ThreadGroup group, final URL resURL,
-            final int taskNum) {
-        super(group);
+    public OggLoopResource(final URL resURL) {
+        super();
         this.soundURL = resURL;
-        this.number = taskNum;
     }
 
     @Override
     public void run() {
         try (AudioInputStream ais = AudioSystem
                 .getAudioInputStream(this.soundURL)) {
-            this.player = new OggLoopPlayThread(ais, this);
+            this.player = new OggLoopPlayThread(ais);
             this.player.play();
-            OggPlayer.taskCompleted(this.number);
         } catch (final UnsupportedAudioFileException e1) {
-            OggPlayer.taskCompleted(this.number);
         } catch (final IOException e1) {
-            OggPlayer.taskCompleted(this.number);
         }
-    }
-    
-    @Override
-    public boolean isPlaying() {
-    	return this.player != null && this.isAlive();
     }
 
     @Override
-    public void stopPlaying() {
+    public boolean isPlaying() {
+        return this.player != null && this.isAlive();
+    }
+
+    @Override
+    public void stopPlayer() {
         if (this.player != null) {
             this.player.stopPlaying();
         }
-    }
-
-    @Override
-    int getNumber() {
-        return this.number;
-    }
-
-    @Override
-    protected void updateNumber(final int newNumber) {
-        this.number = newNumber;
     }
 }

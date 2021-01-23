@@ -20,13 +20,11 @@ class OggPlayThread {
     private AudioInputStream decodedStream;
     private AudioFormat format;
     private AudioFormat decodedFormat;
-    private Thread intCheck;
     private boolean stop;
 
-    public OggPlayThread(final AudioInputStream ais, final Thread thr) {
+    public OggPlayThread(final AudioInputStream ais) {
         this.stream = ais;
         this.stop = false;
-        this.intCheck = thr;
     }
 
     public void play() {
@@ -47,7 +45,7 @@ class OggPlayThread {
                         .getAudioInputStream(this.decodedFormat, this.stream);
             }
         } catch (Exception e) {
-            // Do nothing
+            return;
         }
         DataLine.Info info = new DataLine.Info(SourceDataLine.class,
                 this.decodedFormat);
@@ -56,28 +54,29 @@ class OggPlayThread {
             if (line != null) {
                 line.open(this.decodedFormat);
                 try {
-                    byte[] data = new byte[4096];
+                    byte[] data = new byte[16];
                     // Start
                     line.start();
                     int nBytesRead = 0;
-                    while (nBytesRead != -1) {
+                    while (nBytesRead != -1 && !this.stop) {
                         nBytesRead = this.decodedStream.read(data, 0,
                                 data.length);
+                        if (this.stop) {
+                            return;
+                        }
                         if (nBytesRead != -1) {
                             line.write(data, 0, nBytesRead);
                         }
-                        if (this.stop || this.intCheck.isInterrupted()) {
-                            break;
+                        if (this.stop) {
+                            return;
                         }
                     }
                     // Stop
-                    line.drain();
                     line.stop();
                 } catch (IOException io) {
                     // Do nothing
                 } finally {
                     // Stop
-                    line.drain();
                     line.stop();
                 }
             }
