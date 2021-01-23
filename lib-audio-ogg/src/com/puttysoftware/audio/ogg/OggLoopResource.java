@@ -28,7 +28,7 @@ class OggLoopResource extends OggPlayer {
     public void run() {
         try (AudioInputStream ais = AudioSystem
                 .getAudioInputStream(this.soundURL)) {
-            this.player = new OggLoopPlayThread(ais);
+            this.player = new OggLoopPlayThread(ais, this);
             this.player.play();
             OggPlayer.taskCompleted(this.number);
         } catch (final UnsupportedAudioFileException e1) {

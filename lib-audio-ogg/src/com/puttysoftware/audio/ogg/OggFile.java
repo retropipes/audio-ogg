@@ -34,7 +34,7 @@ class OggFile extends OggPlayer {
             }
             try (AudioInputStream ais = AudioSystem
                     .getAudioInputStream(soundFile)) {
-                this.player = new OggPlayThread(ais);
+                this.player = new OggPlayThread(ais, this);
                 this.player.play();
                 OggPlayer.taskCompleted(this.number);
             } catch (final UnsupportedAudioFileException e1) {

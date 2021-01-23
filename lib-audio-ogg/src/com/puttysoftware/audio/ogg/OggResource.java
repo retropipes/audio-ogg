@@ -28,7 +28,7 @@ class OggResource extends OggPlayer {
     public void run() {
         try (AudioInputStream ais = AudioSystem
                 .getAudioInputStream(this.soundURL)) {
-            this.player = new OggPlayThread(ais);
+            this.player = new OggPlayThread(ais, this);
             this.player.play();
             OggPlayer.taskCompleted(this.number);
         } catch (final UnsupportedAudioFileException e1) {
@@ -37,10 +37,10 @@ class OggResource extends OggPlayer {
             OggPlayer.taskCompleted(this.number);
         }
     }
-    
+
     @Override
     public boolean isPlaying() {
-    	return this.player != null && this.isAlive();
+        return this.player != null && this.isAlive();
     }
 
     @Override

@@ -20,11 +20,13 @@ class OggLoopPlayThread {
     private AudioInputStream decodedStream;
     private AudioFormat format;
     private AudioFormat decodedFormat;
+    private Thread intCheck;
     private boolean stop;
 
-    public OggLoopPlayThread(final AudioInputStream ais) {
+    public OggLoopPlayThread(final AudioInputStream ais, final Thread thr) {
         this.stream = ais;
         this.stop = false;
+        this.intCheck = thr;
     }
 
     public void play() {
@@ -57,7 +59,7 @@ class OggLoopPlayThread {
                     byte[] data = new byte[4096];
                     // Start
                     line.start();
-                    while (!this.stop) {
+                    while (!this.stop && !this.intCheck.isInterrupted()) {
                         int nBytesRead = 0;
                         while (nBytesRead != -1) {
                             nBytesRead = this.decodedStream.read(data, 0,
@@ -65,7 +67,7 @@ class OggLoopPlayThread {
                             if (nBytesRead != -1) {
                                 line.write(data, 0, nBytesRead);
                             }
-                            if (this.stop) {
+                            if (this.stop || this.intCheck.isInterrupted()) {
                                 break;
                             }
                         }
