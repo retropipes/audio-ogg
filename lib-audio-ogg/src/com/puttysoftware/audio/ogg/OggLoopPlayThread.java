@@ -28,36 +28,36 @@ class OggLoopPlayThread {
     }
 
     public void play() {
-        while (!this.stop) {
-            try {
-                // Get AudioInputStream from given file.
-                this.decodedStream = null;
-                if (this.stream != null) {
-                    this.format = this.stream.getFormat();
-                    this.decodedFormat = new AudioFormat(
-                            AudioFormat.Encoding.PCM_SIGNED,
-                            this.format.getSampleRate(), 16,
-                            this.format.getChannels(),
-                            this.format.getChannels() * 2,
-                            this.format.getSampleRate(), false);
-                    // Get AudioInputStream that will be decoded by underlying
-                    // VorbisSPI
-                    this.decodedStream = AudioSystem.getAudioInputStream(
-                            this.decodedFormat, this.stream);
-                }
-            } catch (Exception e) {
-                // Do nothing
+        try {
+            // Get AudioInputStream from given file.
+            this.decodedStream = null;
+            if (this.stream != null) {
+                this.format = this.stream.getFormat();
+                this.decodedFormat = new AudioFormat(
+                        AudioFormat.Encoding.PCM_SIGNED,
+                        this.format.getSampleRate(), 16,
+                        this.format.getChannels(),
+                        this.format.getChannels() * 2,
+                        this.format.getSampleRate(), false);
+                // Get AudioInputStream that will be decoded by underlying
+                // VorbisSPI
+                this.decodedStream = AudioSystem
+                        .getAudioInputStream(this.decodedFormat, this.stream);
             }
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class,
-                    this.decodedFormat);
-            try (Line res = AudioSystem.getLine(info);
-                    SourceDataLine line = (SourceDataLine) res) {
-                if (line != null) {
-                    line.open(this.decodedFormat);
-                    try {
-                        byte[] data = new byte[4096];
-                        // Start
-                        line.start();
+        } catch (Exception e) {
+            // Do nothing
+        }
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class,
+                this.decodedFormat);
+        try (Line res = AudioSystem.getLine(info);
+                SourceDataLine line = (SourceDataLine) res) {
+            if (line != null) {
+                line.open(this.decodedFormat);
+                try {
+                    byte[] data = new byte[4096];
+                    // Start
+                    line.start();
+                    while (!this.stop) {
                         int nBytesRead = 0;
                         while (nBytesRead != -1) {
                             nBytesRead = this.decodedStream.read(data, 0,
@@ -69,20 +69,22 @@ class OggLoopPlayThread {
                                 break;
                             }
                         }
-                        // Stop
-                        line.drain();
-                        line.stop();
-                    } catch (IOException io) {
-                        // Do nothing
-                    } finally {
-                        // Stop
-                        line.drain();
-                        line.stop();
+                        // Reset
+                        this.stream.reset();
                     }
+                    // Stop
+                    line.drain();
+                    line.stop();
+                } catch (IOException io) {
+                    // Do nothing
+                } finally {
+                    // Stop
+                    line.drain();
+                    line.stop();
                 }
-            } catch (LineUnavailableException lue) {
-                // Do nothing
             }
+        } catch (LineUnavailableException lue) {
+            // Do nothing
         }
     }
 
