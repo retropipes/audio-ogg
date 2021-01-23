@@ -5,36 +5,43 @@ All support is handled via the GitHub repository: https://github.com/wrldwzrd89/
  */
 package com.puttysoftware.audio.ogg;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-class OggResource extends OggPlayer {
-    private final URL soundURL;
+class OggLoopFile extends OggPlayer {
+    private final String filename;
     private int number;
-    private OggPlayThread player;
+    private OggLoopPlayThread player;
 
-    public OggResource(final ThreadGroup group, final URL resURL,
+    public OggLoopFile(final ThreadGroup group, final String Oggfile,
             final int taskNum) {
         super(group);
-        this.soundURL = resURL;
+        this.filename = Oggfile;
         this.number = taskNum;
     }
 
     @Override
     public void run() {
-        try (AudioInputStream ais = AudioSystem
-                .getAudioInputStream(this.soundURL)) {
-            this.player = new OggPlayThread(ais);
-            this.player.play();
-            OggPlayer.taskCompleted(this.number);
-        } catch (final UnsupportedAudioFileException e1) {
-            OggPlayer.taskCompleted(this.number);
-        } catch (final IOException e1) {
-            OggPlayer.taskCompleted(this.number);
+        if (this.filename != null) {
+            final File soundFile = new File(this.filename);
+            if (!soundFile.exists()) {
+                OggPlayer.taskCompleted(this.number);
+                return;
+            }
+            try (AudioInputStream ais = AudioSystem
+                    .getAudioInputStream(soundFile)) {
+                this.player = new OggLoopPlayThread(ais);
+                this.player.play();
+                OggPlayer.taskCompleted(this.number);
+            } catch (final UnsupportedAudioFileException e1) {
+                OggPlayer.taskCompleted(this.number);
+            } catch (final IOException e1) {
+                OggPlayer.taskCompleted(this.number);
+            }
         }
     }
     

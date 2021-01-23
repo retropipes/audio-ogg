@@ -23,7 +23,7 @@ public abstract class OggPlayer extends Thread {
     }
 
     // Methods
-    public abstract void stopLoop();
+    public abstract void stopPlaying();
 
     public abstract boolean isPlaying();
 
@@ -32,12 +32,22 @@ public abstract class OggPlayer extends Thread {
     abstract int getNumber();
 
     // Factories
-    public static OggPlayer loadFile(final String file) {
+    public static OggPlayer loadLoopedFile(final String file) {
+        return OggPlayer.provisionMedia(new OggLoopFile(OggPlayer.MEDIA_GROUP,
+                file, OggPlayer.ACTIVE_MEDIA_COUNT));
+    }
+
+    public static OggPlayer loadLoopedResource(final URL resource) {
+        return OggPlayer.provisionMedia(new OggLoopResource(OggPlayer.MEDIA_GROUP,
+                resource, OggPlayer.ACTIVE_MEDIA_COUNT));
+    }
+    
+    public static OggPlayer loadOneShotFile(final String file) {
         return OggPlayer.provisionMedia(new OggFile(OggPlayer.MEDIA_GROUP,
                 file, OggPlayer.ACTIVE_MEDIA_COUNT));
     }
 
-    public static OggPlayer loadResource(final URL resource) {
+    public static OggPlayer loadOneShotResource(final URL resource) {
         return OggPlayer.provisionMedia(new OggResource(OggPlayer.MEDIA_GROUP,
                 resource, OggPlayer.ACTIVE_MEDIA_COUNT));
     }
@@ -48,7 +58,7 @@ public abstract class OggPlayer extends Thread {
 
     private static OggPlayer provisionMedia(final OggPlayer src) {
         if (OggPlayer.ACTIVE_MEDIA_COUNT >= OggPlayer.MAX_MEDIA_ACTIVE) {
-            OggPlayer.killAllMediaPlayers();
+            OggPlayer.stopAllPlayers();
         }
         try {
             if (src != null) {
@@ -62,7 +72,7 @@ public abstract class OggPlayer extends Thread {
         return src;
     }
 
-    private static void killAllMediaPlayers() {
+    public static void stopAllPlayers() {
         OggPlayer.MEDIA_GROUP.interrupt();
     }
 
