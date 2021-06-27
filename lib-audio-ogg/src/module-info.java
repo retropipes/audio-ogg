@@ -11,5 +11,9 @@
 module com.puttysoftware.audio.ogg {
     exports com.puttysoftware.audio.ogg;
 
-    requires java.desktop;
+    requires transitive java.desktop;
+    requires transitive com.github.vorbis;
+    
+    uses javax.sound.sampled.spi.AudioFileReader;
+    uses javax.sound.sampled.spi.FormatConversionProvider;
 }
