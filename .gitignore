@@ -73,6 +73,3 @@ $RECYCLE.BIN/
 
 ## Windows shortcuts
 *.lnk
-
-# Overrides
-!lib-audio-ogg/lib/*.jar
