@@ -13,7 +13,7 @@ public abstract class OggPlayer extends Thread {
 
     // Constructor
     protected OggPlayer() {
-        super("Ogg Media Player");
+	super("Ogg Media Player");
     }
 
     // Methods
@@ -23,36 +23,36 @@ public abstract class OggPlayer extends Thread {
 
     // Factories
     public static OggPlayer loadLoopedFile(final String file) {
-        OggPlayer.stopPlaying();
-        OggPlayer.ACTIVE_MEDIA = new OggLoopFile(file);
-        return OggPlayer.ACTIVE_MEDIA;
+	OggPlayer.stopPlaying();
+	OggPlayer.ACTIVE_MEDIA = new OggLoopFile(file);
+	return OggPlayer.ACTIVE_MEDIA;
     }
 
     public static OggPlayer loadLoopedResource(final URL resource) {
-        OggPlayer.stopPlaying();
-        OggPlayer.ACTIVE_MEDIA = new OggLoopResource(resource);
-        return OggPlayer.ACTIVE_MEDIA;
+	OggPlayer.stopPlaying();
+	OggPlayer.ACTIVE_MEDIA = new OggLoopResource(resource);
+	return OggPlayer.ACTIVE_MEDIA;
     }
 
     public static OggPlayer loadOneShotFile(final String file) {
-        OggPlayer.stopPlaying();
-        OggPlayer.ACTIVE_MEDIA = new OggFile(file);
-        return OggPlayer.ACTIVE_MEDIA;
+	OggPlayer.stopPlaying();
+	OggPlayer.ACTIVE_MEDIA = new OggFile(file);
+	return OggPlayer.ACTIVE_MEDIA;
     }
 
     public static OggPlayer loadOneShotResource(final URL resource) {
-        OggPlayer.stopPlaying();
-        OggPlayer.ACTIVE_MEDIA = new OggResource(resource);
-        return OggPlayer.ACTIVE_MEDIA;
+	OggPlayer.stopPlaying();
+	OggPlayer.ACTIVE_MEDIA = new OggResource(resource);
+	return OggPlayer.ACTIVE_MEDIA;
     }
 
     public void play() {
-        this.start();
+	this.start();
     }
 
     public static void stopPlaying() {
-        if (OggPlayer.ACTIVE_MEDIA != null) {
-            OggPlayer.ACTIVE_MEDIA.stopPlayer();
-        }
+	if (OggPlayer.ACTIVE_MEDIA != null) {
+	    OggPlayer.ACTIVE_MEDIA.stopPlayer();
+	}
     }
 }

@@ -17,30 +17,29 @@ class OggResource extends OggPlayer {
     private OggPlayThread player;
 
     public OggResource(final URL resURL) {
-        super();
-        this.soundURL = resURL;
+	super();
+	this.soundURL = resURL;
     }
 
     @Override
     public void run() {
-        try (AudioInputStream ais = AudioSystem
-                .getAudioInputStream(this.soundURL)) {
-            this.player = new OggPlayThread(ais);
-            this.player.play();
-        } catch (final UnsupportedAudioFileException e1) {
-        } catch (final IOException e1) {
-        }
+	try (AudioInputStream ais = AudioSystem.getAudioInputStream(this.soundURL)) {
+	    this.player = new OggPlayThread(ais);
+	    this.player.play();
+	} catch (final UnsupportedAudioFileException e1) {
+	} catch (final IOException e1) {
+	}
     }
 
     @Override
     public boolean isPlaying() {
-        return this.player != null && this.isAlive();
+	return this.player != null && this.isAlive();
     }
 
     @Override
     protected void stopPlayer() {
-        if (this.player != null) {
-            this.player.stopPlaying();
-        }
+	if (this.player != null) {
+	    this.player.stopPlaying();
+	}
     }
 }
